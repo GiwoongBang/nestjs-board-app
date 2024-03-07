@@ -14,4 +14,10 @@ export class AuthController {
   ): Promise<void> {
     return this.authService.createUser(authCredentialDto);
   }
+
+  @Post('/signin')
+  @UsePipes(CustomValidationPipe)
+  async signIn(@Body() authCredentialDto: AuthCredentialDto): Promise<string> {
+    return this.authService.signIn(authCredentialDto);
+  }
 }
