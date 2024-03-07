@@ -29,6 +29,12 @@ export class BoardsController {
     return this.boardsService.getAllBoards();
   }
 
+  @Get('/my')
+  @UseGuards(AuthGuard())
+  async getAllMyBoards(@getUser() user: User): Promise<Board[]> {
+    return this.boardsService.getAllMyBoards(user);
+  }
+
   @Post('/')
   @UseGuards(AuthGuard())
   @UsePipes(ValidationPipe)
@@ -44,12 +50,6 @@ export class BoardsController {
     return this.boardsService.getBoardById(id);
   }
 
-  @Delete('/:id')
-  @UseGuards(AuthGuard())
-  async deleteBoardById(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.boardsService.deleteBoardById(id);
-  }
-
   @Patch('/status/:id')
   @UseGuards(AuthGuard())
   async updateBoardById(
@@ -57,5 +57,14 @@ export class BoardsController {
     @Body('status', BoardStatusValidatonPipe) status: BoardStatus,
   ): Promise<Board> {
     return this.boardsService.updateBoardById(id, status);
+  }
+
+  @Delete('/:id')
+  @UseGuards(AuthGuard())
+  async deleteMyBoardById(
+    @Param('id', ParseIntPipe) id: number,
+    @getUser() user: User,
+  ): Promise<void> {
+    return this.boardsService.deleteMyBoardById(id, user);
   }
 }
