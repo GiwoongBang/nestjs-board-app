@@ -7,6 +7,7 @@ import { UserRepository } from './user.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { User } from './user.entity';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -18,9 +19,12 @@ export class AuthService {
   async createUser(authCredentialDto: AuthCredentialDto): Promise<void> {
     const { email, password } = authCredentialDto;
 
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const user = new User();
     user.email = email;
-    user.password = password;
+    user.password = hashedPassword;
 
     try {
       await this.userRepository.save(user);
