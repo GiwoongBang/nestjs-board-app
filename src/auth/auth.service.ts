@@ -42,17 +42,35 @@ export class AuthService {
 
   async signIn(
     authCredentialDto: AuthCredentialDto,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const { email, password } = authCredentialDto;
     const user = await this.userRepository.findOne({ where: { email } });
 
     if (user && (await bcrypt.compare(password, user.password))) {
       const payload = { email: email };
-      const accessToken = await this.jwtService.sign(payload);
+      const accessToken = this.jwtService.sign(payload);
+      const refreshToken = this.jwtService.sign(payload, {
+        expiresIn: 3600 * 24 * 30,
+      });
 
-      return { accessToken: accessToken };
+      return { accessToken: accessToken, refreshToken: refreshToken };
     } else {
       throw new UnauthorizedException('Login Failed!');
+    }
+  }
+
+  async reissueAccessToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string }> {
+    try {
+      const { email } = this.jwtService.verify(refreshToken);
+
+      const payload = { email };
+      const accessToken = this.jwtService.sign(payload, { expiresIn: 60 * 60 });
+
+      return { accessToken: accessToken };
+    } catch (error) {
+      throw new UnauthorizedException('인증 정보가 유효하지 않습니다.');
     }
   }
 }

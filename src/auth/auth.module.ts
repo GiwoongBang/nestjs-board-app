@@ -12,7 +12,7 @@ import { JwtStrategy } from './jwt.strategy';
     JwtModule.register({
       secret: 'koreaGodDeveloperGiWoong',
       signOptions: {
-        expiresIn: 60 * 60, // 1시간
+        expiresIn: 60 * 30, // AccessToken: 30분
       },
     }),
   ],

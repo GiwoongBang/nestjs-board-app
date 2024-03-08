@@ -22,4 +22,11 @@ export class AuthController {
   ): Promise<{ accessToken: string }> {
     return this.authService.signIn(authCredentialDto);
   }
+
+  @Post('/refresh')
+  async reissueAccessToken(
+    @Body('refreshToken') refreshToken: string,
+  ): Promise<{ accessToken: string }> {
+    return this.authService.reissueAccessToken(refreshToken);
+  }
 }
