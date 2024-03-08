@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { User } from './user.entity';
 import * as bcrypt from 'bcryptjs';
+import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { BlacklistTokenRepository } from './jwt/jwt-blacklist.repository';
 
@@ -24,8 +25,7 @@ export class AuthService {
   async signUp(authCredentialDto: AuthCredentialDto): Promise<void> {
     const { email, password } = authCredentialDto;
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await argon2.hash(password);
     const payload = { email };
 
     const user = new User();
