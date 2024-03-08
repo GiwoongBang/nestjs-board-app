@@ -10,6 +10,7 @@ import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { User } from './user.entity';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { BlacklistTokenRepository } from './jwt/jwt-blacklist.repository';
 
 @Injectable()
 export class AuthService {
@@ -17,17 +18,20 @@ export class AuthService {
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly blacklistTokenRepository: BlacklistTokenRepository,
   ) {}
 
-  async createUser(authCredentialDto: AuthCredentialDto): Promise<void> {
+  async signUp(authCredentialDto: AuthCredentialDto): Promise<void> {
     const { email, password } = authCredentialDto;
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
+    const payload = { email };
 
     const user = new User();
     user.email = email;
     user.password = hashedPassword;
+    user.refreshToken = this.jwtService.sign(payload);
 
     try {
       await this.userRepository.save(user);
@@ -46,31 +50,73 @@ export class AuthService {
     const { email, password } = authCredentialDto;
     const user = await this.userRepository.findOne({ where: { email } });
 
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const payload = { email: email };
-      const accessToken = this.jwtService.sign(payload);
-      const refreshToken = this.jwtService.sign(payload, {
-        expiresIn: 3600 * 24 * 30,
-      });
-
-      return { accessToken: accessToken, refreshToken: refreshToken };
-    } else {
-      throw new UnauthorizedException('Login Failed!');
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('인증 정보가 유효하지 않습니다.');
     }
+
+    const payload = { email };
+    const accessToken = this.jwtService.sign(payload);
+
+    let refreshToken = '';
+    try {
+      this.jwtService.verify(user.refreshToken);
+      refreshToken = user.refreshToken;
+    } catch (error) {
+      await this.reissuseRefreshToken(email);
+      refreshToken = user.refreshToken;
+    }
+
+    return { accessToken: accessToken, refreshToken: refreshToken };
   }
 
   async reissueAccessToken(
     refreshToken: string,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const { email } = this.jwtService.verify(refreshToken);
+      const user = await this.userRepository.findOne({ where: { email } });
 
       const payload = { email };
-      const accessToken = this.jwtService.sign(payload, { expiresIn: 60 * 60 });
+      const accessToken = this.jwtService.sign(payload);
+      refreshToken = this.jwtService.sign(payload, {
+        expiresIn: 60 * 60 * 24 * 30,
+      });
+      user.refreshToken = refreshToken;
 
-      return { accessToken: accessToken };
+      return { accessToken: accessToken, refreshToken: refreshToken };
     } catch (error) {
       throw new UnauthorizedException('인증 정보가 유효하지 않습니다.');
     }
+  }
+
+  async reissuseRefreshToken(email: string): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    const payload = { email };
+
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: 60 * 60 * 24 * 30,
+    });
+    user.refreshToken = refreshToken;
+    await this.userRepository.save(user);
+  }
+
+  async logout(accessToken: string, refreshToken: string): Promise<void> {
+    this.blacklistTokenRepository.create({ token: accessToken });
+    this.blacklistTokenRepository.create({ token: refreshToken });
+
+    const { email } = this.jwtService.verify(refreshToken);
+    const payload = { email };
+
+    const user = await this.userRepository.findOne({ where: { email } });
+    user.refreshToken = this.jwtService.sign(payload, {
+      expiresIn: 60 * 60 * 24 * 30,
+    });
+  }
+
+  async isTokenBlacklisted(token: string): Promise<boolean> {
+    const blacklistedToken = await this.blacklistTokenRepository.findOne({
+      where: { token },
+    });
+    return !!blacklistedToken;
   }
 }
