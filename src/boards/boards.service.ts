@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BoardStatus } from './board-status.enum';
 import { User } from 'src/auth/user.entity';
 import { getUser } from 'src/auth/get-user.decorator';
+import { BoardResponseDto } from './dto/board-response.dto';
 
 @Injectable()
 export class BoardsService {
@@ -20,7 +21,15 @@ export class BoardsService {
 
   async getAllMyBoards(@getUser() user: User): Promise<Board[]> {
     const query = this.boardRepository.createQueryBuilder('board');
-    query.where('board.userId = :userId', { userId: user.id });
+    query.select([
+      'board.id',
+      'board.title',
+      'board.description',
+      'board.status',
+      'user.id',
+    ]);
+    query.innerJoin('board.user', 'user');
+    query.where('user.id = :userId', { userId: user.id });
 
     const boards = await query.getMany();
 
@@ -30,7 +39,7 @@ export class BoardsService {
   async createBoard(
     createBoardDto: CreateBoardDto,
     user: User,
-  ): Promise<Board> {
+  ): Promise<BoardResponseDto> {
     const { title, description } = createBoardDto;
 
     const board = this.boardRepository.create({
@@ -42,26 +51,56 @@ export class BoardsService {
 
     await this.boardRepository.save(board);
 
-    return board;
+    const response = new BoardResponseDto();
+    response.id = board.id;
+    response.title = board.title;
+    response.description = board.description;
+    response.status = board.status;
+    response.user = { id: board.user.id };
+
+    return response;
   }
 
-  async getBoardById(id: number): Promise<Board> {
+  async getBoardById(id: number): Promise<BoardResponseDto> {
     const foundBoard = await this.boardRepository.findOne({ where: { id } });
 
     if (!foundBoard) {
       throw new NotFoundException(`해당 게시물을 찾을 수 없습니다. ${id}`);
     }
 
-    return foundBoard;
+    const response = new BoardResponseDto();
+    response.id = foundBoard.id;
+    response.title = foundBoard.title;
+    response.description = foundBoard.description;
+    response.status = foundBoard.status;
+    response.user = { id: foundBoard.user.id };
+
+    return response;
   }
 
-  async updateBoardById(id: number, status: BoardStatus): Promise<Board> {
-    const foundBoard = await this.getBoardById(id);
+  async updateBoardById(
+    id: number,
+    status: BoardStatus,
+  ): Promise<BoardResponseDto> {
+    const foundBoard = await this.boardRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    if (!foundBoard) {
+      throw new NotFoundException(`해당 게시물을 찾을 수 없습니다. ${id}`);
+    }
 
     foundBoard.status = status;
     await this.boardRepository.save(foundBoard);
 
-    return foundBoard;
+    const response = new BoardResponseDto();
+    response.id = foundBoard.id;
+    response.title = foundBoard.title;
+    response.description = foundBoard.description;
+    response.status = foundBoard.status;
+    response.user = { id: foundBoard.user.id };
+
+    return response;
   }
 
   async deleteMyBoardById(id: number, user: User): Promise<void> {

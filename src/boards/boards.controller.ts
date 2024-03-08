@@ -19,6 +19,7 @@ import { BoardStatus } from './board-status.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { getUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
+import { BoardResponseDto } from './dto/board-response.dto';
 
 @Controller('boards')
 export class BoardsController {
@@ -41,12 +42,14 @@ export class BoardsController {
   async createBoard(
     @Body() createBoardDto: CreateBoardDto,
     @getUser() user: User,
-  ): Promise<Board> {
+  ): Promise<BoardResponseDto> {
     return this.boardsService.createBoard(createBoardDto, user);
   }
 
   @Get('/:id')
-  async getBoardById(@Param('id', ParseIntPipe) id: number): Promise<Board> {
+  async getBoardById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<BoardResponseDto> {
     return this.boardsService.getBoardById(id);
   }
 
@@ -55,7 +58,7 @@ export class BoardsController {
   async updateBoardById(
     @Param('id', ParseIntPipe) id: number,
     @Body('status', BoardStatusValidatonPipe) status: BoardStatus,
-  ): Promise<Board> {
+  ): Promise<BoardResponseDto> {
     return this.boardsService.updateBoardById(id, status);
   }
 
