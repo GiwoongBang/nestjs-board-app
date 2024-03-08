@@ -11,7 +11,7 @@ export class AuthController {
   @UsePipes(CustomValidationPipe)
   async createUser(
     @Body() authCredentialDto: AuthCredentialDto,
-  ): Promise<void> {
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     return this.authService.signUp(authCredentialDto);
   }
 

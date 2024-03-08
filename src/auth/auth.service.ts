@@ -8,7 +8,6 @@ import { UserRepository } from './user.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { User } from './user.entity';
-import * as bcrypt from 'bcryptjs';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { BlacklistTokenRepository } from './jwt/jwt-blacklist.repository';
@@ -22,7 +21,9 @@ export class AuthService {
     private readonly blacklistTokenRepository: BlacklistTokenRepository,
   ) {}
 
-  async signUp(authCredentialDto: AuthCredentialDto): Promise<void> {
+  async signUp(
+    authCredentialDto: AuthCredentialDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const { email, password } = authCredentialDto;
 
     const hashedPassword = await argon2.hash(password);
@@ -42,6 +43,9 @@ export class AuthService {
         throw new InternalServerErrorException();
       }
     }
+
+    const result = await this.signIn(authCredentialDto);
+    return result;
   }
 
   async signIn(
@@ -50,7 +54,7 @@ export class AuthService {
     const { email, password } = authCredentialDto;
     const user = await this.userRepository.findOne({ where: { email } });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user || !(await argon2.verify(user.password, password))) {
       throw new UnauthorizedException('인증 정보가 유효하지 않습니다.');
     }
 
