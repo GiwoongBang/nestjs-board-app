@@ -1,4 +1,5 @@
 import { Board } from 'src/boards/board.entity';
+import { Order } from 'src/payments/entities/order.entity';
 import {
   BaseEntity,
   Column,
@@ -23,7 +24,9 @@ export class User extends BaseEntity {
   @Column()
   refreshToken: string;
 
-  // @OneToMany(type => Board, board => board.user, { eager: true })
   @OneToMany(() => Board, (board) => board.user, { eager: true })
   boards: Board[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }
