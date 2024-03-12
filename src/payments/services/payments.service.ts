@@ -65,6 +65,11 @@ export class PaymentsService {
     );
   }
 
+  @Transactional()
+  async completeOrder(orderId: string): Promise<Order> {
+    return this.orderRepository.completeOrder(orderId);
+  }
+
   private async calculateTotalAmount(orderItems: OrderItem[]): Promise<number> {
     let totalAmount = 0;
 
