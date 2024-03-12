@@ -6,6 +6,7 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
+  PrimaryGeneratedColumn,
   Relation,
 } from 'typeorm';
 import { IssuedCoupon } from './issued-coupon.entity';
@@ -17,11 +18,17 @@ export type OrderStatus = 'started' | 'paid' | 'refunded';
 
 @Entity()
 export class Order extends BaseEntity {
-  @ManyToOne(() => User, (user) => user.orders)
-  user: User;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ type: 'varchar' })
   orderNo: string;
+
+  @Column()
+  name: string;
+
+  @Column()
+  address: string;
 
   @Column()
   amount: number;
@@ -29,23 +36,8 @@ export class Order extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
   status: OrderStatus;
 
-  @OneToMany(() => OrderItem, (item) => item.order)
-  items: Relation<OrderItem[]>;
-
   @Column({ type: 'int', default: 0 })
   pointAmountUsed: number;
-
-  @OneToOne(() => IssuedCoupon, (issuedCoupon) => issuedCoupon.usedOrder, {
-    nullable: true,
-  })
-  @JoinColumn()
-  usedIssuedCoupon: Relation<IssuedCoupon>;
-
-  @OneToOne(() => ShippingInfo, (shippingInfo) => shippingInfo.order, {
-    nullable: true,
-  })
-  @JoinColumn()
-  shippingInfo: Relation<ShippingInfo>;
 
   @Column({ type: 'text', nullable: true })
   refundReason: string;
@@ -59,6 +51,24 @@ export class Order extends BaseEntity {
   @Column({ type: 'jsonb', nullable: true })
   pgMetadata: any;
 
+  @ManyToOne(() => User, (user) => user.orders)
+  user: User;
+
+  @OneToMany(() => OrderItem, (item) => item.order)
+  items: Relation<OrderItem[]>;
+
+  @OneToOne(() => IssuedCoupon, (issuedCoupon) => issuedCoupon.usedOrder, {
+    nullable: true,
+  })
+  @JoinColumn()
+  usedIssuedCoupon: Relation<IssuedCoupon>;
+
+  @OneToOne(() => ShippingInfo, (shippingInfo) => shippingInfo.order, {
+    nullable: true,
+  })
+  @JoinColumn()
+  shippingInfo: Relation<ShippingInfo>;
+
   constructor() {
     super();
     this.setOrderNo();
@@ -66,13 +76,12 @@ export class Order extends BaseEntity {
 
   setOrderNo() {
     const date = new Date();
-    const dateFormat = `${date.getFullYear()}${String(
-      date.getMonth() + 1,
-    ).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}${String(
-      date.getHours(),
-    ).padStart(2, '0')}${String(date.getMinutes()).padStart(2, '0')}${String(
-      date.getSeconds(),
-    ).padStart(2, '0')}`;
+    const dateFormat = `${date.getFullYear()}
+                        ${String(date.getMonth() + 1).padStart(2, '0')}
+                        ${String(date.getDate()).padStart(2, '0')}
+                        ${String(date.getHours()).padStart(2, '0')}
+                        ${String(date.getMinutes()).padStart(2, '0')}
+                        ${String(date.getSeconds()).padStart(2, '0')}`;
     const randomString = Array.from(
       { length: 15 },
       () => Math.random().toString(36)[2] || '0',

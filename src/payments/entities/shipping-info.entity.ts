@@ -1,4 +1,11 @@
-import { BaseEntity, Column, Entity, OneToOne, Relation } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  Relation,
+} from 'typeorm';
 import { Order } from './order.entity';
 
 export type ShippingStatus =
@@ -10,8 +17,8 @@ export type ShippingStatus =
 
 @Entity()
 export class ShippingInfo extends BaseEntity {
-  @OneToOne(() => Order, (order) => order.shippingInfo)
-  order: Relation<Order>;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ type: 'text' })
   address: string;
@@ -24,4 +31,7 @@ export class ShippingInfo extends BaseEntity {
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   shippingCompany: string;
+
+  @OneToOne(() => Order, (order) => order.shippingInfo)
+  order: Relation<Order>;
 }

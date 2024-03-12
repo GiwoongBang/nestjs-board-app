@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToOne,
+  PrimaryGeneratedColumn,
   Relation,
 } from 'typeorm';
 import { Coupon } from './coupon.entity';
@@ -13,6 +14,9 @@ import { Order } from './order.entity';
 
 @Entity()
 export class IssuedCoupon extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column({ type: 'boolean', default: false })
   isValid: boolean;
 

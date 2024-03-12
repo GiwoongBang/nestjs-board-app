@@ -1,10 +1,20 @@
-import { BaseEntity, Column, Entity, OneToMany, Relation } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Relation,
+} from 'typeorm';
 import { IssuedCoupon } from './issued-coupon.entity';
 
 type CouponType = 'percent' | 'fixed';
 
 @Entity()
 export class Coupon extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column({ type: 'varchar', length: 50 })
   type: CouponType;
 
