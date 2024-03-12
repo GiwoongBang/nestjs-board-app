@@ -6,7 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { PaymentsModule } from './payments/payments.module';
 import { PaymentsController } from './payments/payments.controller';
 import { PaymentsService } from './payments/services/payments.service';
-import { OrderRepository } from './payments/repositories/payments-order.repository';
+import { OrderRepository } from './payments/repositories/order.repository';
 
 @Module({
   imports: [

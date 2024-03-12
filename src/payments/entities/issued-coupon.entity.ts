@@ -13,17 +13,6 @@ import { Order } from './order.entity';
 
 @Entity()
 export class IssuedCoupon extends BaseEntity {
-  @ManyToOne(() => User)
-  @JoinColumn()
-  user: Relation<User>;
-
-  @ManyToOne(() => Coupon)
-  @JoinColumn()
-  coupon: Relation<Coupon>;
-
-  @OneToOne(() => Order, (order) => order.usedIssuedCoupon, { nullable: true })
-  usedOrder: Relation<Order>;
-
   @Column({ type: 'boolean', default: false })
   isValid: boolean;
 
@@ -38,6 +27,17 @@ export class IssuedCoupon extends BaseEntity {
 
   @Column({ type: 'timestamp', nullable: true })
   usedAt: Date;
+
+  @ManyToOne(() => User)
+  @JoinColumn()
+  user: Relation<User>;
+
+  @ManyToOne(() => Coupon)
+  @JoinColumn()
+  coupon: Relation<Coupon>;
+
+  @OneToOne(() => Order, (order) => order.usedIssuedCoupon, { nullable: true })
+  usedOrder: Relation<Order>;
 
   use() {
     this.isUsed = true;

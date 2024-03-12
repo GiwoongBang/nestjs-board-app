@@ -8,7 +8,9 @@ export class BoardStatusValidatonPipe implements PipeTransform {
     value = value.toUpperCase();
 
     if (!this.isStatusValid(value)) {
-      throw new BadRequestException(`${value} isn't in the status options`);
+      throw new BadRequestException(
+        `적절한 게시글의 상태 옵션이 아닙니다. your option: ${value}`,
+      );
     }
 
     return value;
