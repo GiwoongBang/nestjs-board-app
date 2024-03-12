@@ -22,6 +22,15 @@ export class User extends BaseEntity {
   password: string;
 
   @Column()
+  name: string;
+
+  @Column()
+  address: string;
+
+  @Column()
+  isSeller: boolean;
+
+  @Column()
   refreshToken: string;
 
   @OneToMany(() => Board, (board) => board.user, { eager: true })
