@@ -2,6 +2,7 @@ import { Body, Controller, Post, Req, UsePipes } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { CustomValidationPipe } from './pipes/user-signup-validation.pipe';
+import { UserSginUpDto } from './dto/sign-up.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -10,9 +11,10 @@ export class AuthController {
   @Post('/signup')
   @UsePipes(CustomValidationPipe)
   async createUser(
-    @Body() authCredentialDto: AuthCredentialDto,
+    @Body() userSginUpDto: UserSginUpDto,
+    @Body() AuthCredentialDto: AuthCredentialDto,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    return this.authService.signUp(authCredentialDto);
+    return this.authService.signUp(userSginUpDto, AuthCredentialDto);
   }
 
   @Post('/signin')

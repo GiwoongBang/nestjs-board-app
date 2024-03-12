@@ -11,6 +11,7 @@ import { User } from './user.entity';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { BlacklistTokenRepository } from './jwt/jwt-blacklist.repository';
+import { UserSginUpDto } from './dto/sign-up.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,9 +23,10 @@ export class AuthService {
   ) {}
 
   async signUp(
+    userSginUpDto: UserSginUpDto,
     authCredentialDto: AuthCredentialDto,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const { email, password } = authCredentialDto;
+    const { email, password, name, address, isSeller } = userSginUpDto;
 
     const hashedPassword = await argon2.hash(password);
     const payload = { email };
@@ -32,6 +34,9 @@ export class AuthService {
     const user = new User();
     user.email = email;
     user.password = hashedPassword;
+    user.name = name;
+    user.address = address;
+    user.isSeller = isSeller;
     user.refreshToken = this.jwtService.sign(payload);
 
     try {
