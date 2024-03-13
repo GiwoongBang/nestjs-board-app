@@ -1,37 +1,35 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
-import { CreateCouponDto } from '../dto/create-coupon.dto';
-import { UserRepository } from 'src/auth/user.repository';
 import { CouponRepository } from '../repositories/coupon.repository';
-import { Coupon } from '../entities/coupon.entity';
+import { Coupon, CouponType } from '../entities/coupon.entity';
 import { IssuedCoupon } from '../entities/issued-coupon.entity';
-import { UUID } from 'crypto';
+import { v4 as uuid } from 'uuid';
 import { IssuedCouponRepository } from '../repositories/issued-coupon.repository';
 import { User } from 'src/auth/user.entity';
+import { CreateCouponDto } from '../dto/create-coupon.dto';
 
 @Injectable()
 export class CouponService {
   constructor(
-    private readonly userRepository: UserRepository,
     private readonly couponRepository: CouponRepository,
     private readonly issuedCouponRepository: IssuedCouponRepository,
   ) {}
 
   @Transactional()
   async createCoupon(createCouponDto: CreateCouponDto): Promise<Coupon> {
-    const { type } = createCouponDto;
+    const { name, type, value } = createCouponDto;
+    const changedType = this.typeChanger(type);
 
-    if (type.toUpperCase() !== 'PERCENT' || type.toUpperCase() === 'FIXED') {
-      throw new BadRequestException(
-        `쿠폰 타입이 유효하지 않습니다. Coupon Type: ${type}`,
-      );
-    }
+    const coupon = new Coupon();
+    coupon.name = name;
+    coupon.type = changedType;
+    coupon.value = value;
 
-    return await this.couponRepository.createCoupon(createCouponDto);
+    return await this.couponRepository.save(coupon);
   }
 
   @Transactional()
-  async issueCoupon(couponId: UUID, user: User): Promise<IssuedCoupon> {
+  async issueCoupon(couponId: uuid, user: User): Promise<IssuedCoupon> {
     const coupon = await this.couponRepository.findOne({
       where: { id: couponId },
     });
@@ -43,5 +41,17 @@ export class CouponService {
     }
 
     return this.issuedCouponRepository.issue(user, coupon);
+  }
+
+  typeChanger(type: string): CouponType {
+    const lowerCaseType = type.toLowerCase();
+
+    if (lowerCaseType === 'percent') {
+      return 'percent';
+    } else if (lowerCaseType === 'fixed') {
+      return 'fixed';
+    } else {
+      throw new BadRequestException(`유효하지 않은 쿠폰 타입입니다: ${type}`);
+    }
   }
 }
