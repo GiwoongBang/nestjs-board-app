@@ -17,11 +17,13 @@ import { UserRepository } from 'src/auth/user.repository';
 import { CouponRepository } from './repositories/coupon.repository';
 import { CouponService } from './services/coupon.service';
 import { ProductService } from './services/product.service';
+import { User } from 'src/auth/user.entity';
 
 @Module({
   imports: [
     AuthModule,
     TypeOrmModule.forFeature([
+      User,
       Coupon,
       IssuedCoupon,
       OrderItem,
