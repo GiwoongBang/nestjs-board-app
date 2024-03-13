@@ -1,4 +1,5 @@
 import { Board } from 'src/boards/board.entity';
+import { IssuedCoupon } from 'src/payments/entities/issued-coupon.entity';
 import { Order } from 'src/payments/entities/order.entity';
 import {
   BaseEntity,
@@ -38,4 +39,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
+
+  @OneToMany(() => IssuedCoupon, (issuedCopon) => issuedCopon.user)
+  issuedCoupons: IssuedCoupon[];
 }

@@ -3,22 +3,26 @@ import {
   Column,
   Entity,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Relation,
 } from 'typeorm';
 import { IssuedCoupon } from './issued-coupon.entity';
+import { v4 as uuid } from 'uuid';
 
-type CouponType = 'percent' | 'fixed';
+export type CouponType = 'percent' | 'fixed';
 
 @Entity()
 export class Coupon extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn('uuid')
+  id: string = uuid();
+
+  @Column({ type: 'varchar' })
+  name: string;
 
   @Column({ type: 'varchar', length: 50 })
   type: CouponType;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2 })
+  @Column({ type: 'decimal', precision: 6, scale: 2 })
   value: number;
 
   @OneToMany(() => IssuedCoupon, (issuedCoupon) => issuedCoupon.coupon)

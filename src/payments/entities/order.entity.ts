@@ -48,8 +48,8 @@ export class Order extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   refundedAt: Date;
 
-  @Column({ type: 'jsonb', nullable: true })
-  pgMetadata: any;
+  // @Column({ type: 'jsonb', nullable: true })
+  // pgMetadata: any;
 
   @ManyToOne(() => User, (user) => user.orders)
   user: User;

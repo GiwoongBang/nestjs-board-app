@@ -10,15 +10,20 @@ import { Coupon } from './entities/coupon.entity';
 import { IssuedCoupon } from './entities/issued-coupon.entity';
 import { Product } from './entities/product.entity';
 import { OrderRepository } from './repositories/order.repository';
-import { ProductService } from './services/product.service';
-import { IssuedCouponRepository } from './repositories/issued-coupon.repository';
 import { ShippingInfoRepository } from './repositories/shipping-info.repository';
 import { ProductRepository } from './repositories/product.repository';
+import { IssuedCouponRepository } from './repositories/issued-coupon.repository';
+import { UserRepository } from 'src/auth/user.repository';
+import { CouponRepository } from './repositories/coupon.repository';
+import { CouponService } from './services/coupon.service';
+import { ProductService } from './services/product.service';
+import { User } from 'src/auth/user.entity';
 
 @Module({
   imports: [
     AuthModule,
     TypeOrmModule.forFeature([
+      User,
       Coupon,
       IssuedCoupon,
       OrderItem,
@@ -29,9 +34,12 @@ import { ProductRepository } from './repositories/product.repository';
   ],
   controllers: [PaymentsController],
   providers: [
+    CouponService,
     PaymentsService,
     ProductService,
 
+    UserRepository,
+    CouponRepository,
     IssuedCouponRepository,
     OrderRepository,
     ProductRepository,

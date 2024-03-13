@@ -17,7 +17,7 @@ export class IssuedCoupon extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'boolean', default: true })
   isValid: boolean;
 
   @Column({ type: 'timestamp', nullable: false })
@@ -32,7 +32,7 @@ export class IssuedCoupon extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   usedAt: Date;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.issuedCoupons)
   @JoinColumn()
   user: Relation<User>;
 
