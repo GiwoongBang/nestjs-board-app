@@ -9,6 +9,7 @@ import { IssuedCouponRepository } from '../repositories/issued-coupon.repository
 import { ShippingInfoRepository } from '../repositories/shipping-info.repository';
 import { UserRepository } from 'src/auth/user.repository';
 import { ShippingInfo } from '../entities/shipping-info.entity';
+import { UUID } from 'crypto';
 
 @Injectable()
 export class PaymentsService {
@@ -95,7 +96,7 @@ export class PaymentsService {
   private async applyDiscounts(
     totalAmount: number,
     userId: string,
-    couponId?: string,
+    couponId?: UUID,
   ): Promise<number> {
     const couponDiscount = couponId
       ? await this.applyCoupon(couponId, userId, totalAmount)
@@ -106,13 +107,13 @@ export class PaymentsService {
   }
 
   private async applyCoupon(
-    couponId: string,
+    couponId: UUID,
     userId: string,
     totalAmount: number,
   ): Promise<number> {
     const issuedCoupon = await this.issuedCouponRepository.findOne({
       where: {
-        coupon: { id: parseInt(couponId) },
+        coupon: { id: couponId },
         user: { id: parseInt(userId) },
       },
     });

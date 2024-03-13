@@ -7,13 +7,17 @@ import {
   Relation,
 } from 'typeorm';
 import { IssuedCoupon } from './issued-coupon.entity';
+import { UUID } from 'crypto';
 
-type CouponType = 'percent' | 'fixed';
+export type CouponType = 'percent' | 'fixed';
 
 @Entity()
 export class Coupon extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: UUID;
+
+  @Column({ type: 'varchar' })
+  name: string;
 
   @Column({ type: 'varchar', length: 50 })
   type: CouponType;
