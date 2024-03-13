@@ -4,9 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeORMConfig } from './configs/typeorm.config';
 import { AuthModule } from './auth/auth.module';
 import { PaymentsModule } from './payments/payments.module';
-import { PaymentsController } from './payments/payments.controller';
-import { PaymentsService } from './payments/services/payments.service';
-import { OrderRepository } from './payments/repositories/order.repository';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -15,7 +14,7 @@ import { OrderRepository } from './payments/repositories/order.repository';
     AuthModule,
     PaymentsModule,
   ],
-  controllers: [PaymentsController],
-  providers: [PaymentsService, OrderRepository],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
