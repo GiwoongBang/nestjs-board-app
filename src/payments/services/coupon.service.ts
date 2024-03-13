@@ -7,6 +7,7 @@ import { Coupon } from '../entities/coupon.entity';
 import { IssuedCoupon } from '../entities/issued-coupon.entity';
 import { UUID } from 'crypto';
 import { IssuedCouponRepository } from '../repositories/issued-coupon.repository';
+import { User } from 'src/auth/user.entity';
 
 @Injectable()
 export class CouponService {
@@ -30,18 +31,14 @@ export class CouponService {
   }
 
   @Transactional()
-  async issueCoupon(couponId: UUID, userId: string): Promise<IssuedCoupon> {
-    const user = await this.userRepository.findOne({
-      where: { id: parseInt(userId) },
-    });
-
+  async issueCoupon(couponId: UUID, user: User): Promise<IssuedCoupon> {
     const coupon = await this.couponRepository.findOne({
       where: { id: couponId },
     });
 
-    if (!user || !coupon) {
+    if (!coupon) {
       throw new BadRequestException(
-        `유저 또는 쿠폰 정보를 확인할 수 없습니다. userId: ${userId} couponId: ${couponId}`,
+        `쿠폰 정보를 확인할 수 없습니다. couponId: ${couponId}`,
       );
     }
 
