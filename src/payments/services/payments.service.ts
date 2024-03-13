@@ -5,11 +5,11 @@ import { Order } from '../entities/order.entity';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { OrderItem } from '../entities/order-item.entity';
 import { ProductService } from './product.service';
-import { IssuedCouponRepository } from '../repositories/issued-coupon.repository';
 import { ShippingInfoRepository } from '../repositories/shipping-info.repository';
 import { UserRepository } from 'src/auth/user.repository';
 import { ShippingInfo } from '../entities/shipping-info.entity';
 import { UUID } from 'crypto';
+import { IssuedCouponRepository } from '../repositories/issued-coupon.repository';
 
 @Injectable()
 export class PaymentsService {
