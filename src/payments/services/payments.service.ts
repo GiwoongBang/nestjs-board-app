@@ -67,6 +67,9 @@ export class PaymentsService {
 
   @Transactional()
   async completeOrder(orderId: string): Promise<Order> {
+    if (typeof orderId !== 'string' || orderId.trim() === '') {
+      throw new BadRequestException('잘못된 주문번호입니다.');
+    }
     return this.orderRepository.completeOrder(orderId);
   }
 
