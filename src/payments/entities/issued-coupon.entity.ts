@@ -32,7 +32,7 @@ export class IssuedCoupon extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   usedAt: Date;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.issuedCoupons)
   @JoinColumn()
   user: Relation<User>;
 
