@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Order } from './entities/order.entity';
 import { PaymentsService } from './services/payments.service';
@@ -9,12 +9,17 @@ import { v4 as uuid } from 'uuid';
 import { IssuedCoupon } from './entities/issued-coupon.entity';
 import { getUser } from 'src/auth/get-user.decorator';
 import { CreateCouponDto } from './dto/create-coupon.dto';
+import { PointDto } from './dto/point.dto';
+import { PointService } from './services/point.service';
+import { Point } from './entities/point.entity';
+import { PointLog } from './entities/point-log.entity';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(
-    private readonly paymentService: PaymentsService,
     private readonly couponService: CouponService,
+    private readonly paymentService: PaymentsService,
+    private readonly pointService: PointService,
   ) {}
 
   @Post('/order')
@@ -40,5 +45,26 @@ export class PaymentsController {
     @getUser() user: User,
   ): Promise<IssuedCoupon> {
     return this.couponService.issueCoupon(couponId, user);
+  }
+
+  @Post('/point/earn')
+  async earnPoint(
+    @Body() pointDto: PointDto,
+    @getUser() user: User,
+  ): Promise<Point> {
+    return this.pointService.earnPoint(pointDto, user);
+  }
+
+  @Post('/point/use')
+  async usePoint(
+    @Body() pointDto: PointDto,
+    @getUser() user: User,
+  ): Promise<Point> {
+    return this.pointService.usePoint(pointDto, user);
+  }
+
+  @Get('/point/history')
+  async pointHistory(@getUser() user: User): Promise<PointLog[]> {
+    return this.pointService.getAllPointHistory(user);
   }
 }

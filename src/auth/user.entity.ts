@@ -1,12 +1,15 @@
 import { Board } from 'src/boards/board.entity';
 import { IssuedCoupon } from 'src/payments/entities/issued-coupon.entity';
 import { Order } from 'src/payments/entities/order.entity';
+import { Point } from 'src/payments/entities/point.entity';
 import {
   BaseEntity,
   Column,
   Entity,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
+  Relation,
   Unique,
 } from 'typeorm';
 
@@ -35,11 +38,14 @@ export class User extends BaseEntity {
   refreshToken: string;
 
   @OneToMany(() => Board, (board) => board.user, { eager: true })
-  boards: Board[];
+  boards: Relation<Board[]>;
 
   @OneToMany(() => Order, (order) => order.user)
-  orders: Order[];
+  orders: Relation<Order[]>;
 
   @OneToMany(() => IssuedCoupon, (issuedCopon) => issuedCopon.user)
-  issuedCoupons: IssuedCoupon[];
+  issuedCoupons: Relation<IssuedCoupon[]>;
+
+  @OneToOne(() => Point, (point) => point.user)
+  point: Relation<IssuedCoupon[]>;
 }
