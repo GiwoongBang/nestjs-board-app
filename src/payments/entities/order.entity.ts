@@ -13,6 +13,7 @@ import { IssuedCoupon } from './issued-coupon.entity';
 import { User } from 'src/auth/user.entity';
 import { OrderItem } from './order-item.entity';
 import { ShippingInfo } from './shipping-info.entity';
+import { PgConnection } from './pg.entity';
 
 export type OrderStatus = 'started' | 'paid' | 'refunded';
 
@@ -48,14 +49,14 @@ export class Order extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   refundedAt: Date;
 
-  // @Column({ type: 'jsonb', nullable: true })
-  // pgMetadata: any;
-
   @ManyToOne(() => User, (user) => user.orders)
-  user: User;
+  user: Relation<User>;
 
   @OneToMany(() => OrderItem, (item) => item.order)
   items: Relation<OrderItem[]>;
+
+  @OneToMany(() => PgConnection, (pgConnection) => pgConnection.order)
+  pgConnects: PgConnection[];
 
   @OneToOne(() => IssuedCoupon, (issuedCoupon) => issuedCoupon.usedOrder, {
     nullable: true,

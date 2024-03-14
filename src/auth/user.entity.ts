@@ -1,6 +1,7 @@
 import { Board } from 'src/boards/board.entity';
 import { IssuedCoupon } from 'src/payments/entities/issued-coupon.entity';
 import { Order } from 'src/payments/entities/order.entity';
+import { PgConnection } from 'src/payments/entities/pg.entity';
 import { Point } from 'src/payments/entities/point.entity';
 import {
   BaseEntity,
@@ -45,6 +46,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => IssuedCoupon, (issuedCopon) => issuedCopon.user)
   issuedCoupons: Relation<IssuedCoupon[]>;
+
+  @OneToMany(() => PgConnection, (pgConnection) => pgConnection.user)
+  pgConnects: PgConnection[];
 
   @OneToOne(() => Point, (point) => point.user)
   point: Relation<IssuedCoupon[]>;
