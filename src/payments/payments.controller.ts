@@ -13,6 +13,8 @@ import { PointDto } from './dto/point.dto';
 import { PointService } from './services/point.service';
 import { Point } from './entities/point.entity';
 import { PointLog } from './entities/point-log.entity';
+import { PgConnectionService } from './services/pg.service';
+import { PgConnectionDto } from './dto/pg-connection.dto';
 
 @Controller('payments')
 export class PaymentsController {
@@ -20,6 +22,7 @@ export class PaymentsController {
     private readonly couponService: CouponService,
     private readonly paymentService: PaymentsService,
     private readonly pointService: PointService,
+    private readonly pgConnectionService: PgConnectionService,
   ) {}
 
   @Post('/order')
@@ -66,5 +69,18 @@ export class PaymentsController {
   @Get('/point/history')
   async pointHistory(@getUser() user: User): Promise<PointLog[]> {
     return this.pointService.getAllPointHistory(user);
+  }
+
+  @Post('/pg')
+  async createPgConnection(
+    @Body() pgConnectionDto: PgConnectionDto,
+    @Body() order: Order,
+    @getUser() user: User,
+  ): Promise<string> {
+    return this.pgConnectionService.createPgConnection(
+      pgConnectionDto,
+      order,
+      user,
+    );
   }
 }
