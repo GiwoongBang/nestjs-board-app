@@ -18,6 +18,11 @@ import { CouponRepository } from './repositories/coupon.repository';
 import { CouponService } from './services/coupon.service';
 import { ProductService } from './services/product.service';
 import { User } from 'src/auth/user.entity';
+import { PointLog } from './entities/point-log.entity';
+import { Point } from './entities/point.entity';
+import { PointService } from './services/point.service';
+import { PointRepository } from './repositories/point.repository';
+import { PointLogRepository } from './repositories/point-log.repository';
 
 @Module({
   imports: [
@@ -28,6 +33,8 @@ import { User } from 'src/auth/user.entity';
       IssuedCoupon,
       OrderItem,
       Order,
+      PointLog,
+      Point,
       Product,
       ShippingInfo,
     ]),
@@ -36,12 +43,15 @@ import { User } from 'src/auth/user.entity';
   providers: [
     CouponService,
     PaymentsService,
+    PointService,
     ProductService,
 
     UserRepository,
     CouponRepository,
     IssuedCouponRepository,
     OrderRepository,
+    PointLogRepository,
+    PointRepository,
     ProductRepository,
     ShippingInfoRepository,
   ],
