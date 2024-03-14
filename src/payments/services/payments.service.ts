@@ -10,6 +10,7 @@ import { UserRepository } from 'src/auth/user.repository';
 import { ShippingInfo } from '../entities/shipping-info.entity';
 import { UUID } from 'crypto';
 import { IssuedCouponRepository } from '../repositories/issued-coupon.repository';
+import { PointRepository } from '../repositories/point.repository';
 
 @Injectable()
 export class PaymentsService {
@@ -19,6 +20,7 @@ export class PaymentsService {
     private readonly issuedCouponRepository: IssuedCouponRepository,
     private readonly shippingInfoRepository: ShippingInfoRepository,
     private readonly userRepository: UserRepository,
+    private readonly pointRepository: PointRepository,
   ) {}
 
   @Transactional()
@@ -31,6 +33,7 @@ export class PaymentsService {
       totalAmount,
       createOrderDto.userId,
       createOrderDto.couponId,
+      createOrderDto.pointAmountToUse,
     );
 
     return this.createOrder(
@@ -97,12 +100,17 @@ export class PaymentsService {
     totalAmount: number,
     userId: string,
     couponId?: UUID,
+    pointAmountToUse?: number,
   ): Promise<number> {
     const couponDiscount = couponId
       ? await this.applyCoupon(couponId, userId, totalAmount)
       : 0;
 
-    const finalAmount = totalAmount - couponDiscount;
+    const pointDiscount = pointAmountToUse
+      ? await this.applyPoints(pointAmountToUse, userId)
+      : 0;
+
+    const finalAmount = totalAmount - couponDiscount - pointDiscount;
     return finalAmount < 0 ? 0 : finalAmount;
   }
 
@@ -142,5 +150,21 @@ export class PaymentsService {
     } else {
       return 0;
     }
+  }
+
+  private async applyPoints(
+    pointAmountToUse: number,
+    userId: string,
+  ): Promise<number> {
+    const point = await this.pointRepository.findOne({
+      where: { user: { id: parseInt(userId) } },
+    });
+    if (point.availableAmount < 0 || point.availableAmount < pointAmountToUse) {
+      throw new BadRequestException(
+        `사용 가능한 포인트를 확인해 주세요. 나의 포인트: ${point.availableAmount}`,
+      );
+    }
+
+    return pointAmountToUse;
   }
 }
